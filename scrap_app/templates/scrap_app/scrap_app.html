@@ -1,0 +1,125 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Newspaper Scraping App</title>
+</head>
+<body>
+    <h1>Newspaper Scraping App</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <select name="newspaper">
+            <option value="hindustan_times">Hindustan Times</option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    {% if excel_file_url %}
+        <a href="{{ excel_file_url }}" download>Download Excel File</a>
+    {% endif %}
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Newspaper Scraping App</title>
+    <style>
+        body {
+            background-color: rgb(165, 152, 238);
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+        }
+
+        .container1 {
+            width: 450px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            color: black;
+            text-align: center;
+        }
+
+        a:link {
+            text-decoration: none;
+            color: #ff4081;
+        }
+        a:visited {
+            text-decoration: none;
+            color: #ff4081;
+        }
+        a:hover {
+            text-decoration: none;
+            color: #ff4081;
+        }
+        a:active {
+            text-decoration: none;
+            color: #ff4081;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 24px;
+            color: black;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            color: #333;
+            background-color: #f1f1f1;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            color: #fff;
+            background-color: #ff4081;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #ff517b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Newspaper Scraping App</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            <select name="newspaper" >
+                <option value="" selected="selected" hidden="hidden">Choose Newspaper here</option>
+                <option value="hindustan_times">Hindustan Times</option>
+            </select>
+            <button type="submit" value="Submit" class="submit-btn">Submit</button>
+        </form>
+        {% if excel_file_url %}
+        <a href="{{ excel_file_url }}" download>Download Excel File</a>
+        {% endif %}
+    </div>
+    <div class="container1">
+        <p><strong> Note: </strong>Under Experiment. Only work for <a href="https://www.hindustantimes.com/"target="_blank"><strong>Hindustan times</strong></a></p>
+    </div>
+</body>
+
+</html>
