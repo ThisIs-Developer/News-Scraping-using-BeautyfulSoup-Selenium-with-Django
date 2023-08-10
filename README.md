@@ -7,36 +7,3 @@
  * [@Arpan Bhattacharya](https://github.com/Arpan550)
  * [@Bhishmadev Ghosh](https://github.com/bhishma620)
  * [@Ayan Chatterjee](https://github.com/Ayan123C)
-
-project-root/
-│
-├── manage.py
-│
-├── newspaper_scraper/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-│
-├── scrap_app/
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tasks.py
-│   ├── views.py
-│   ├── urls.py
-│   │
-│   ├── templates/
-│   │   └── scrap_app/
-│   │       └── scrap_app.html
-│
-├── static/
-│   ├── css/
-│   ├── js/
-│   ├── images/
-
-│
-├── chromedriver/
-│   └── chromedriver.exe
-│
-└── db.sqlite3
