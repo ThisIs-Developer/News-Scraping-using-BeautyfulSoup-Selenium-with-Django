@@ -28,7 +28,6 @@ def scrape_newspaper(request):
     
     return render(request, 'scrap_app/scrap_app.html')
 
-
 def hindustantimesbangla():
     # Set Chrome driver path
     driver_path = "D:\Drivers\chromedriver_win32\chromedriver.exe"
@@ -93,7 +92,7 @@ def hindustantimesbangla():
         headline = headline_element.text if headline_element else "Headline not found"
 
         # Find the elements with class "sortDec"
-        # sort_dec_elements = soup.find_all(class_="contentSec")
+        sort_dec_elements = soup.find_all(class_="highlights")
 
         # Find the <p> tags
         p_tags = soup.find_all("p")
@@ -108,7 +107,7 @@ def hindustantimesbangla():
         # Store the scraped data
         scraped_data.append({
             "Headline": headline,
-            # "SortDec": "\n".join([element.text for element in sort_dec_elements]),
+            "SortDec": "\n".join([element.text for element in sort_dec_elements]),
             "News": "\n".join([p_tag.text for p_tag in p_tags]),
             "Image Source": image_src,
             "Image Caption": image_caption
@@ -133,6 +132,7 @@ def zeenews():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.cookies": 2})
 
     # Create the WebDriver instance
     driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
@@ -185,7 +185,18 @@ def zeenews():
             sort_dec_elements = soup.find_all(class_="margin-bt10px")
 
             # Find the <p> tags
-            p_tags = soup.find_all("p")
+            # p_tags = soup.find_all("p")
+
+            # Find the news content
+            news_content = ""
+            field_items = soup.find("div", class_="field field-name-body field-type-text-with-summary field-label-hidden")
+            if field_items:
+                div_field_items = field_items.find("div", class_="field-items")
+                if div_field_items:
+                    field_item_even = div_field_items.find("div", class_="field-item even")
+                    if field_item_even:
+                        p_tags = field_item_even.find_all("p")
+                        news_content = " ".join([p_tag.text for p_tag in p_tags])
 
             # Find the image element with class "media"
             image_element = soup.find(class_="field-item even")
@@ -199,7 +210,8 @@ def zeenews():
                 "Class": class_name,
                 "Headline": headline,
                 "SortDec": "\n".join([element.text for element in sort_dec_elements]),
-                "News": "\n".join([p_tag.text for p_tag in p_tags]),
+                # "News": "\n".join([p_tag.text for p_tag in p_tags]),
+                "News": news_content,
                 "Image Source": image_src,
                 "Image Caption": image_caption,
             })
