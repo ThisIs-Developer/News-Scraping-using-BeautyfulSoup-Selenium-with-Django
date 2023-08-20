@@ -12,6 +12,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow-y: hidden;
         }
 
         .container {
@@ -23,14 +24,22 @@
         }
 
         .container1 {
-            width: 750px;
+            width: 650px;
             margin: 100px auto;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.6);
             border-radius: 10px;
             color: black;
             text-align: center;
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
+
+        .container1:hover {
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+
 
         a:link,
         a:visited {
@@ -56,15 +65,24 @@
             padding: 10px;
             margin-bottom: 20px;
             border-radius: 5px;
-            border: none;
+            border: 2px solid #ccc;
             font-size: 16px;
             color: #333;
-            background-color: #f1f1f1;
+            background-color: #fff;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><polygon fill="%23333" points="0,0 10,0 5,6"/></svg>');
             background-repeat: no-repeat;
             background-position: right 10px center;
-            appearance: none;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            cursor: pointer;
             -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #ff4081;
+            box-shadow: 0 0 5px rgba(255, 64, 129, 0.5);
         }
 
         .submit-btn {
@@ -74,13 +92,20 @@
             border-radius: 5px;
             border: none;
             font-size: 16px;
-            color: #fff;
+            color: #ffffff;
             background-color: #ff4081;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border: 3px solid #ff4081;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
         }
 
         .submit-btn:hover {
-            background-color: #ff517b;
+            background-color: transparent;
+            color: #ff4081;
+            border-color: #ff4081;
         }
 
         .footer {
@@ -106,6 +131,7 @@
                 <option value="" selected="selected" hidden="hidden">Choose Newspaper here</option>
                 <option value="zeenews">Zee News</option>
                 <option value="tv9bangla">TV9 Bangla</option>
+                <option value="anandabazar">Anandabazar</option>
                 <option value="hindustantimesbangla">Hindustan Times Bangla</option>
             </select>
             <button type="submit" value="Submit" class="submit-btn">Submit</button>
@@ -115,9 +141,14 @@
         {% endif %}
     </div>
     <div class="container1">
-        <p><strong> Note: </strong>Under Experiment. Only work for
+        <p>
+            <strong> Note: </strong>Under Experiment.
+        </p>
+        <p>
+            Only work for
             <a href="https://zeenews.india.com/bengali/" target="_blank"><strong>Zee News, </strong></a>
-            <a href="https://tv9bangla.com/" target="_blank"><strong>TV9 Bangla, &</strong></a>
+            <a href="https://tv9bangla.com/" target="_blank"><strong>TV9 Bangla, </strong></a>
+            <a href="https://www.anandabazar.com/" target="_blank"><strong>Anandabazar, &</strong></a>
             <a href="https://bangla.hindustantimes.com/" target="_blank"><strong>Hindustan Times Bangla</strong></a>
         </p>
     </div>
