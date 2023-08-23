@@ -341,6 +341,7 @@ def anandabazar():
     chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
     chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
 
     # Create the WebDriver instance
@@ -431,15 +432,26 @@ def anandabazar():
     return scraped_data
 
 def save_to_excel(data):
-    # Create a pandas DataFrame from the scraped data
-    df = pd.DataFrame(data)
-
-    # Save the DataFrame to an Excel file
     excel_file_path = "scraped_data.xlsx"
-    df.to_excel(excel_file_path, index=False)
+
+    # Check if the Excel file already exists
+    if os.path.exists(excel_file_path):
+        # Load the existing Excel file into a DataFrame
+        existing_df = pd.read_excel(excel_file_path)
+        
+        # Append the new data to the existing DataFrame
+        new_df = pd.DataFrame(data)
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        
+        # Save the combined DataFrame back to the Excel file
+        combined_df.to_excel(excel_file_path, index=False)
+    else:
+        # If the Excel file doesn't exist, create a new DataFrame and save it
+        df = pd.DataFrame(data)
+        df.to_excel(excel_file_path, index=False)
 
     # Create a FileResponse to download the Excel file
     excel_file_response = FileResponse(open(excel_file_path, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     excel_file_response['Content-Disposition'] = 'attachment; filename="scraped_data.xlsx"'
-    
+
     return excel_file_response
