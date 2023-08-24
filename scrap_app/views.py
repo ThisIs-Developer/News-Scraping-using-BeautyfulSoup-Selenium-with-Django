@@ -1,34 +1,81 @@
 import os
 import time
+import threading
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.urls import reverse
+from django.http import FileResponse
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import NoSuchElementException
-from django.http import FileResponse
+
+# Other functions remain the same
+
+excel_file_path = "scraped_data.xlsx"  # Global variable to store the Excel file path
+iteration_count = 0  # Global variable to track the iteration count
+
 
 def scrape_newspaper(request):
-    if request.method == 'POST':
-        newspaper_source = request.POST.get('newspaper')
-
-        if newspaper_source == 'hindustantimesbangla':
-            data = hindustantimesbangla()
-        elif newspaper_source == 'zeenews':
-            data = zeenews()
-        elif newspaper_source == 'tv9bangla':
-            data = tv9bangla()
-        elif newspaper_source == 'anandabazar':
-            data = anandabazar()
-
-        excel_file_response = save_to_excel(data)
-        
-        return excel_file_response
+    global iteration_count
     
-    return render(request, 'scrap_app/scrap_app.html')
+    if request.method == 'GET':
+        return render(request, 'scrap_app/scrap_app.html')
+
+    while True:  # Infinite loop
+        data = []  # Data to store scraped information
+        
+        # Create a list to hold the threads
+        threads = []
+
+        # Create and start a thread for each scraping function
+        thread1 = threading.Thread(target=scrape_thread, args=(hindustantimesbangla, data))
+        thread2 = threading.Thread(target=scrape_thread, args=(zeenews, data))
+        thread3 = threading.Thread(target=scrape_thread, args=(tv9bangla, data))
+        # thread4 = threading.Thread(target=scrape_thread, args=(anandabazar, data))
+        
+        threads.extend([thread1, thread2, thread3])
+
+        for thread in threads:
+            thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        iteration_count += 1  # Increment the iteration count
+
+        # Save the scraped data to an Excel file
+        save_to_excel(data, iteration_count)
+        
+        if iteration_count > 1:
+            # Wait for 2 minutes before the next iteration
+            time.sleep(120)
+
+def save_to_excel(data, iteration):
+    global excel_file_path
+    
+    # Create a new Excel file for the first iteration
+    if iteration == 1:
+        df = pd.DataFrame(data)
+        df.to_excel(excel_file_path, index=False)
+    else:
+        # Load the existing Excel file into a DataFrame
+        existing_df = pd.read_excel(excel_file_path)
+        
+        # Append the new data to the existing DataFrame
+        new_df = pd.DataFrame(data)
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        
+        # Save the combined DataFrame back to the Excel file
+        combined_df.to_excel(excel_file_path, index=False)
+
+def scrape_thread(scrape_function, data):
+    scraped_data = scrape_function()
+    data.extend(scraped_data)
 
 def hindustantimesbangla():
     # Set Chrome driver path
@@ -330,129 +377,104 @@ def tv9bangla():
 
     return scraped_data
 
-def anandabazar():
-    # Set Chrome driver path
-    driver_path = "D:\Drivers\chromedriver_win32\chromedriver.exe"
+# def anandabazar():
+#     # Set Chrome driver path
+#     driver_path = "D:\Drivers\chromedriver_win32\chromedriver.exe"
     
-    # Set Chrome options
-    chrome_options = Options()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
-    chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
-    chrome_options.add_argument("Connection: keep-alive")
+#     # Set Chrome options
+#     chrome_options = Options()
+#     chrome_options.add_argument("--no-sandbox")
+#     chrome_options.add_argument("--disable-gpu")
+#     chrome_options.add_argument("--window-size=1920x1080")
+#     chrome_options.add_argument("--disable-extensions")
+#     chrome_options.add_argument("--disable-notifications")
+#     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
+#     chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
+#     chrome_options.add_argument("Connection: keep-alive")
 
-    # Create the WebDriver instance
-    driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+#     # Create the WebDriver instance
+#     driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
-    # Set the website and Chrome webdriver path
-    website = "https://www.anandabazar.com/"
+#     # Set the website and Chrome webdriver path
+#     website = "https://www.anandabazar.com/"
 
-    # Open the website
-    driver.get(website)
+#     # Open the website
+#     driver.get(website)
 
-    # Wait for the website to load
-    time.sleep(5)
+#     # Wait for the website to load
+#     time.sleep(5)
 
-    class_names = ["leadstorybox", "storylisting", "storylbox"]
-    scraped_data = []
+#     class_names = ["leadstorybox", "storylisting", "storylbox"]
+#     scraped_data = []
 
-    for class_name in class_names:
-        # Find all elements with the current class
-        elements = driver.find_elements(By.CLASS_NAME, class_name)
+#     for class_name in class_names:
+#         # Find all elements with the current class
+#         elements = driver.find_elements(By.CLASS_NAME, class_name)
 
-        # Scrape data from each element
-        for element in elements:
-            try:
-                # Get the element link
-                element_link = element.find_element(By.TAG_NAME, "a").get_attribute("href")
-            except NoSuchElementException:
-                continue  # Skip to the next iteration if the hyperlink is not found
+#         # Scrape data from each element
+#         for element in elements:
+#             try:
+#                 # Get the element link
+#                 element_link = element.find_element(By.TAG_NAME, "a").get_attribute("href")
+#             except NoSuchElementException:
+#                 continue  # Skip to the next iteration if the hyperlink is not found
 
-            # Open a new tab with the element link
-            driver.execute_script(f"window.open('{element_link}', '_blank');")
+#             # Open a new tab with the element link
+#             driver.execute_script(f"window.open('{element_link}', '_blank');")
 
-            # Switch to the newly opened tab
-            driver.switch_to.window(driver.window_handles[-1])
+#             # Switch to the newly opened tab
+#             driver.switch_to.window(driver.window_handles[-1])
 
-            # Wait for the page to load
-            time.sleep(5)
+#             # Wait for the page to load
+#             time.sleep(5)
 
-            # Get the HTML of the page
-            html = driver.page_source
+#             # Get the HTML of the page
+#             html = driver.page_source
 
-            # Create a BeautifulSoup object
-            soup = BeautifulSoup(html, "html.parser")
+#             # Create a BeautifulSoup object
+#             soup = BeautifulSoup(html, "html.parser")
 
-            # Find the headline element
-            headline_element = soup.find("h1", class_="mt-8")
-            headline = headline_element.text if headline_element else "Headline not found"
+#             # Find the headline element
+#             headline_element = soup.find("h1", class_="mt-8")
+#             headline = headline_element.text if headline_element else "Headline not found"
 
-            # Find the elements with class "margin-bt10px"
-            sort_dec_elements = soup.find_all("h2", class_="mt-8")
+#             # Find the elements with class "margin-bt10px"
+#             sort_dec_elements = soup.find_all("h2", class_="mt-8")
 
-            # Find the news content
-            p_tags = soup.find("div", class_="contentbox").find_all("p")
-            news_content = " ".join([p_tag.text for p_tag in p_tags])
+#             # Find the news content
+#             p_tags = soup.find("div", class_="contentbox").find_all("p")
+#             news_content = " ".join([p_tag.text for p_tag in p_tags])
 
-            # Find the image element with class "leadimgbox mt-24"
-            image_element = soup.find(class_="leadimgbox mt-24")
+#             # Find the image element with class "leadimgbox mt-24"
+#             image_element = soup.find(class_="leadimgbox mt-24")
 
-            # Get the image source and the image caption
-            image_src = image_element.find("img")["src"] if image_element and image_element.find("img") else ""
+#             # Get the image source and the image caption
+#             image_src = image_element.find("img")["src"] if image_element and image_element.find("img") else ""
 
-            # Find the image caption within the div with class "leadimgbox mt-24"
-            image_caption_element = soup.find("div", class_="leadimgbox mt-24")
-            image_caption = ""
-            if image_caption_element:
-                p_tag = image_caption_element.find("p")
-                if p_tag:
-                    spans = p_tag.find_all("span")
-                    image_caption = " ".join([span.text for span in spans if span.text])
+#             # Find the image caption within the div with class "leadimgbox mt-24"
+#             image_caption_element = soup.find("div", class_="leadimgbox mt-24")
+#             image_caption = ""
+#             if image_caption_element:
+#                 p_tag = image_caption_element.find("p")
+#                 if p_tag:
+#                     spans = p_tag.find_all("span")
+#                     image_caption = " ".join([span.text for span in spans if span.text])
 
-            # Store the scraped data
-            scraped_data.append({
-                "Class": class_name,
-                "Headline": headline,
-                "SortDec": "\n".join([element.text for element in sort_dec_elements]),
-                "News": news_content,
-                "Image Source": image_src,
-                "Image Caption": image_caption
-            })
+#             # Store the scraped data
+#             scraped_data.append({
+#                 "Class": class_name,
+#                 "Headline": headline,
+#                 "SortDec": "\n".join([element.text for element in sort_dec_elements]),
+#                 "News": news_content,
+#                 "Image Source": image_src,
+#                 "Image Caption": image_caption
+#             })
 
-            # Close the current tab and switch back to the main tab
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+#             # Close the current tab and switch back to the main tab
+#             driver.close()
+#             driver.switch_to.window(driver.window_handles[0])
 
-    # Close the webdriver
-    driver.quit()
+#     # Close the webdriver
+#     driver.quit()
 
-    return scraped_data
-
-def save_to_excel(data):
-    excel_file_path = "scraped_data.xlsx"
-
-    # Check if the Excel file already exists
-    if os.path.exists(excel_file_path):
-        # Load the existing Excel file into a DataFrame
-        existing_df = pd.read_excel(excel_file_path)
-        
-        # Append the new data to the existing DataFrame
-        new_df = pd.DataFrame(data)
-        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        
-        # Save the combined DataFrame back to the Excel file
-        combined_df.to_excel(excel_file_path, index=False)
-    else:
-        # If the Excel file doesn't exist, create a new DataFrame and save it
-        df = pd.DataFrame(data)
-        df.to_excel(excel_file_path, index=False)
-
-    # Create a FileResponse to download the Excel file
-    excel_file_response = FileResponse(open(excel_file_path, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    excel_file_response['Content-Disposition'] = 'attachment; filename="scraped_data.xlsx"'
-
-    return excel_file_response
+#     return scraped_data
