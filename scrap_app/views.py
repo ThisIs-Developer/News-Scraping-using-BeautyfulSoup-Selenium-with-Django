@@ -1,6 +1,8 @@
 import os
 import time
+import datetime
 import threading
+import openpyxl
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -55,23 +57,38 @@ def scrape_newspaper(request):
             # Wait for 2 minutes before the next iteration
             time.sleep(120)
 
-def save_to_excel(data, iteration):
-    global excel_file_path
+def save_to_excel(data, iteration_count):
+    current_date = datetime.datetime.now().strftime('%d-%m-%Y')
+    current_time = datetime.datetime.now().strftime('%H-%M-%S')
     
-    # Create a new Excel file for the first iteration
-    if iteration == 1:
-        df = pd.DataFrame(data)
-        df.to_excel(excel_file_path, index=False)
+    scrap_data_folder = os.path.join("Scrap Data")
+    os.makedirs(scrap_data_folder, exist_ok=True)
+    
+    current_date_folder = os.path.join(scrap_data_folder, current_date)
+    os.makedirs(current_date_folder, exist_ok=True)
+    
+    file_name = f"scraped_data_{current_time}_{current_date}.xlsx"
+    file_path = os.path.join(current_date_folder, file_name)
+
+    df = pd.DataFrame(data)
+    
+    if iteration_count == 1:
+        df.to_excel(file_path, index=False)
     else:
-        # Load the existing Excel file into a DataFrame
-        existing_df = pd.read_excel(excel_file_path)
+        if os.path.exists(file_path):
+            book = openpyxl.load_workbook(file_path)
+            writer = pd.ExcelWriter(file_path, engine='openpyxl') 
+            writer.book = book
+            df.to_excel(writer, index=False, sheet_name=f"Iteration_{iteration_count}")
+            writer.save()
+            writer.close()
+        else:
+            df.to_excel(file_path, index=False)
         
-        # Append the new data to the existing DataFrame
-        new_df = pd.DataFrame(data)
-        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        
-        # Save the combined DataFrame back to the Excel file
-        combined_df.to_excel(excel_file_path, index=False)
+    excel_file_response = FileResponse(open(file_path, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    excel_file_response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+
+    return excel_file_response
 
 def scrape_thread(scrape_function, data):
     scraped_data = scrape_function()
@@ -251,8 +268,13 @@ def zeenews():
             image_element = soup.find(class_="field-item even")
 
             # Get the image source and the image caption
-            image_src = image_element.find("img")["src"] if image_element else ""
-            image_caption = ""
+            if image_element:
+                image_src = image_element.find("img")["src"]
+                image_caption_element = image_element.find("figcaption")
+                image_caption = image_caption_element.text if image_caption_element else ""
+            else:
+                image_src = ""
+                image_caption = ""
 
             # Store the scraped data
             scraped_data.append({
