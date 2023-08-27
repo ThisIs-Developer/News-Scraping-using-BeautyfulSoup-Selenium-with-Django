@@ -267,14 +267,19 @@ def zeenews():
             # Find the image element with class "media"
             image_element = soup.find(class_="field-item even")
 
-            # Get the image source and the image caption
+            # Initialize image_src and image_caption with default values
+            image_src = ""
+            image_caption = ""
+
+            # Check if image_element is not None before accessing its attributes
             if image_element:
-                image_src = image_element.find("img")["src"]
+                img_tag = image_element.find("img")
+                if img_tag and "src" in img_tag.attrs:
+                    image_src = img_tag["src"]
+
                 image_caption_element = image_element.find("figcaption")
-                image_caption = image_caption_element.text if image_caption_element else ""
-            else:
-                image_src = ""
-                image_caption = ""
+                if image_caption_element:
+                    image_caption = image_caption_element.text
 
             # Store the scraped data
             scraped_data.append({
@@ -409,10 +414,10 @@ def tv9bangla():
 #     chrome_options.add_argument("--disable-gpu")
 #     chrome_options.add_argument("--window-size=1920x1080")
 #     chrome_options.add_argument("--disable-extensions")
+#     chrome_options.add_argument(f"load-extension=path_to_ublock_extension_directory")
 #     chrome_options.add_argument("--disable-notifications")
 #     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
 #     chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
-#     chrome_options.add_argument("Connection: keep-alive")
 
 #     # Create the WebDriver instance
 #     driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
