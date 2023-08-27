@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import NoSuchElementException
+from .models import HindustanTimesBangla, ZeeNews, TV9Bangla
 
 # Other functions remain the same
 
@@ -51,44 +52,32 @@ def scrape_newspaper(request):
         iteration_count += 1  # Increment the iteration count
 
         # Save the scraped data to an Excel file
-        save_to_excel(data, iteration_count)
+        save_to_database(data)
         
         if iteration_count > 1:
             # Wait for 2 minutes before the next iteration
             time.sleep(120)
 
-def save_to_excel(data, iteration_count):
-    current_date = datetime.datetime.now().strftime('%d-%m-%Y')
-    current_time = datetime.datetime.now().strftime('%H-%M-%S')
-    
-    scrap_data_folder = os.path.join("Scrap Data")
-    os.makedirs(scrap_data_folder, exist_ok=True)
-    
-    current_date_folder = os.path.join(scrap_data_folder, current_date)
-    os.makedirs(current_date_folder, exist_ok=True)
-    
-    file_name = f"scraped_data_{current_time}_{current_date}.xlsx"
-    file_path = os.path.join(current_date_folder, file_name)
-
-    df = pd.DataFrame(data)
-    
-    if iteration_count == 1:
-        df.to_excel(file_path, index=False)
-    else:
-        if os.path.exists(file_path):
-            book = openpyxl.load_workbook(file_path)
-            writer = pd.ExcelWriter(file_path, engine='openpyxl') 
-            writer.book = book
-            df.to_excel(writer, index=False, sheet_name=f"Iteration_{iteration_count}")
-            writer.save()
-            writer.close()
-        else:
-            df.to_excel(file_path, index=False)
+def save_to_database(data):
+    for item in data:
+        # Determine which model to use based on the news source
+        if item["News Source"] == "hindustantimesbangla":
+            news_model = HindustanTimesBangla
+        elif item["News Source"] == "zeenews":
+            news_model = ZeeNews
+        elif item["News Source"] == "tv9bangla":
+            news_model = TV9Bangla
+        # Add more conditions for other news sources
         
-    excel_file_response = FileResponse(open(file_path, 'rb'), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    excel_file_response['Content-Disposition'] = f'attachment; filename="{file_name}"'
-
-    return excel_file_response
+        # Create a new instance of the news model and save it to the database
+        news_instance = news_model(
+            headline=item["Headline"],
+            sort_description=item["SortDec"],
+            news=item["News"],
+            image_source=item["Image Source"],
+            image_caption=item["Image Caption"]
+        )
+        news_instance.save()
 
 def scrape_thread(scrape_function, data):
     scraped_data = scrape_function()
@@ -170,14 +159,17 @@ def hindustantimesbangla():
         image_src = image_element.find("source")["srcset"] if image_element else ""
         image_caption = image_element.find("figcaption").text if (image_element and image_element.find("figcaption")) else ""
 
-        # Store the scraped data
-        scraped_data.append({
+        # Adding "News Source" information correctly
+        item = {
             "Headline": headline,
             "SortDec": "\n".join([element.text for element in sort_dec_elements]),
             "News": "\n".join([p_tag.text for p_tag in p_tags]),
             "Image Source": image_src,
             "Image Caption": image_caption
-        })
+        }
+
+        item["News Source"] = "hindustantimesbangla"
+        scraped_data.append(item)
 
         # Close the current tab and switch back to the main tab
         driver.close()
@@ -282,15 +274,16 @@ def zeenews():
                     image_caption = image_caption_element.text
 
             # Store the scraped data
-            scraped_data.append({
+            item = {
                 "Class": class_name,
                 "Headline": headline,
                 "SortDec": "\n".join([element.text for element in sort_dec_elements]),
-                # "News": "\n".join([p_tag.text for p_tag in p_tags]),
                 "News": news_content,
                 "Image Source": image_src,
                 "Image Caption": image_caption,
-            })
+            }
+            item["News Source"] = "zeenews"
+            scraped_data.append(item)
 
             # Close the current tab and switch back to the main tab
             driver.close()
@@ -386,14 +379,16 @@ def tv9bangla():
                 image_caption = caption_element.text if caption_element else ""
 
             # Store the scraped data
-            scraped_data.append({
+            item = {
                 "Class": class_name,
                 "Headline": headline,
                 "SortDec": "\n".join([element.text for element in sort_dec_elements]),
                 "News": "\n".join([p_tag.text for p_tag in p_tags]),
                 "Image Source": image_src,
                 "Image Caption": image_caption,
-            })
+            }
+            item["News Source"] = "tv9bangla"
+            scraped_data.append(item)
 
             # Close the current tab and switch back to the main tab
             driver.close()
