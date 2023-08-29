@@ -13,6 +13,8 @@
             height: 100vh;
             margin: 0;
             overflow-y: hidden;
+
+
         }
 
         .container {
@@ -127,14 +129,7 @@
 
         <form method="POST">
             {% csrf_token %}
-            <select name="newspaper">
-                <option value="" selected="selected" hidden="hidden">Choose Newspaper here</option>
-                <option value="zeenews">Zee News</option>
-                <option value="tv9bangla">TV9 Bangla</option>
-                <option value="anandabazar">Anandabazar</option>
-                <option value="hindustantimesbangla">Hindustan Times Bangla</option>
-            </select>
-            <button type="submit" value="Submit" class="submit-btn">Submit</button>
+            <button type="submit" value="Submit" class="submit-btn">Start Scraping</button>
         </form>
         {% if excel_file_url %}
         <a href="{{ excel_file_url }}" download>Download Excel File</a>
