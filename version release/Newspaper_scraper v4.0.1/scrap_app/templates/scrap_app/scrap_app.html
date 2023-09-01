@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Newspaper Scraping App</title>
+    <style>
+        body {
+            background-color: rgb(165, 152, 238);
+            color: #fff;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow-y: hidden;
+
+
+        }
+
+        .container {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+        }
+
+        .container1 {
+            width: 650px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            color: black;
+            text-align: center;
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .container1:hover {
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+
+
+        a:link,
+        a:visited {
+            text-decoration: none;
+            color: #ff4081;
+        }
+
+        a:hover,
+        a:active {
+            text-decoration: none;
+            color: #ff4081;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 24px;
+            color: black;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><polygon fill="%23333" points="0,0 10,0 5,6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #ff4081;
+            box-shadow: 0 0 5px rgba(255, 64, 129, 0.5);
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #ff4081;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border: 3px solid #ff4081;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+
+        .submit-btn:hover {
+            background-color: transparent;
+            color: #ff4081;
+            border-color: #ff4081;
+        }
+
+        .footer {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Newspaper Scraping App</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" value="Submit" class="submit-btn">Start Scraping</button>
+        </form>
+        {% if excel_file_url %}
+        <a href="{{ excel_file_url }}" download>Download Excel File</a>
+        {% endif %}
+    </div>
+    <div class="container1">
+        <p>
+            <strong> Note: </strong>Under Experiment.
+        </p>
+        <p>
+            Only work for
+            <a href="https://zeenews.india.com/bengali/" target="_blank"><strong>Zee News, </strong></a>
+            <a href="https://tv9bangla.com/" target="_blank"><strong>TV9 Bangla, </strong></a>
+            <a href="https://www.anandabazar.com/" target="_blank"><strong>Anandabazar, &</strong></a>
+            <a href="https://bangla.hindustantimes.com/" target="_blank"><strong>Hindustan Times Bangla</strong></a>
+        </p>
+    </div>
+    <div class="footer">
+        All Rights Reserved &copy; 2023
+    </div>
+</body>
+
+</html>
