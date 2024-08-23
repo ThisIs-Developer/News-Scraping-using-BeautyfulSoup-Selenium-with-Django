@@ -50,7 +50,7 @@ To get a local copy up and running, follow these steps.
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/iam-baivab/News-Scraping-using-BeautifulSoup-Selenium-with-Django.git
+    git clone https://github.com/ThisIs-Developer/News-Scraping-using-BeautifulSoup-Selenium-with-Django.git
     ```
 2. Navigate to the project directory:
     ```sh
@@ -183,6 +183,6 @@ Distributed under the Apache License 2.0. See `LICENSE` for more information.
 - [Django](https://www.djangoproject.com/)
 
 [license-shield]: https://img.shields.io/badge/License-Apache%202.0-red.svg
-[license-url]: https://github.com/iam-baivab/News-Scraping-using-BeautyfulSoup-Selenium-with-Django/blob/main/LICENSE
+[license-url]: https://github.com/ThisIs-Developer/News-Scraping-using-BeautyfulSoup-Selenium-with-Django/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat&logo=linkedin&colorB=blue
 [linkedin-url]: https://www.linkedin.com/in/baivabsarkar/
