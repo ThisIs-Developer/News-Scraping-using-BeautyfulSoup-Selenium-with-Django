@@ -165,6 +165,8 @@ def hindustantimesbangla():
             "SortDec": "\n".join([element.text for element in sort_dec_elements]),
             "News": "\n".join([p_tag.text for p_tag in p_tags]),
             "Image Source": image_src,
+
+            
             "Image Caption": image_caption
         }
 
